@@ -8,17 +8,17 @@ using ParallelAccelerator
 using DocOpt
 using Images
 
+type Trace
+	kernel	
+	iterations::Int
+end
 
 
+backtrace = Array(Trace,0)
 
-
-
-
-
-
-
-
-
+macro getname(arg)
+           string(arg)
+       end
 
 @acc function blur(img, iterations)
     buf = copy(img)
@@ -35,14 +35,35 @@ using Images
 end
     
 
+function process(session_id,kernel,input, iterations)
+	img = load(input)
+	img2 = kernel(img,iterations)
+	
+	filterName = @getname(kernel)
+	outputName = string(input,"-",filterName,".png")
+	save(outputName,img2)
+
+	
+	trace = Trace(kernel, iterations)	
+	return trace, outputName
+	
+end
+
+function process(id::Int,trace::Trace, input::String)
+	process(id, trace.kernel, input,trace.iterations)
+end
 
 
+function traceBack(backtrace, input::String)
+	lastOutput = input
+	for i in backtrace
+		lastOutput = process(1,i, lastOutput)[2]	
+	end
+end
 
-
-    img =  load("portinari.png")
-
-    img2 = blur(img,10)
-    save("portinari-blur.png",img2)
+process(1,blur,"portinari.png",1)
+    
+    
     
 
 
