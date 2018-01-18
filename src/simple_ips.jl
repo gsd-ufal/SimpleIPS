@@ -96,7 +96,9 @@ process(1,blur,"portinari.png",1)
 	return meta_csv
  end
 
-
+function loadDataset(infra_id::AbstractString,dataset::AbstractString)
+		run(`sudo docker cp $infra_id:/opt/datasets/$dataset  .`)
+end
 
 
 function getDatasetMetadata(name::String)
