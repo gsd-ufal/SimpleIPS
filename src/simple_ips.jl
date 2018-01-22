@@ -6,6 +6,9 @@ using FileIO
 using ParallelAccelerator
 include("default_kernels.jl")
 
+include("install_requirements.jl")
+include("default_kernels.jl")
+
 
 
 
@@ -23,6 +26,7 @@ backtrace = Array(Trace,0)
 macro getname(arg)
            string(arg)
        end
+
 
 
     
@@ -90,11 +94,44 @@ process(1,blur,"portinari.png",1)
 
 
 
-
+#put a dataset name and get it's metadata
 function getDatasetMetadata(name::String)
 	f=open(name)
 
 	readdlm(string(name,"-metadata.txt"),';')
 	
 end
+
+
+
+#mock functions at the moment
+
+function getSLA(address::String, authkey::String, sla::String, dataset::String)
+	session_id = 1	
+end
+
+
+function deployinfra(authkey::String, resources)
+	infra_id = 1
+	return infra_id
+end
+
+#finish a session
+finish(session_id::Int64)
+	undeployinfra(session_id)
+end
+
+function loaddataset(datasetname::String)
+	#send a message to the storage service to load the dataset
+end
+
+
+#this function must send a message to the compute service and aske for the status and bill
+function undeployinfra(session_id::Int64)
+
+	status =  ["here should be a return status from compute service", "here should be the bill"]
+
+end
+
+
 
