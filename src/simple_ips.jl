@@ -1,7 +1,7 @@
 using Images
-using ImageView
-using ImageMagick
-using TestImages
+#using ImageView
+#using ImageMagick
+#using TestImages
 using FileIO
 using ParallelAccelerator
 include("default_kernels.jl")
@@ -117,7 +117,7 @@ function deployinfra(authkey::String, resources)
 end
 
 #finish a session
-finish(session_id::Int64)
+function finish(session_id::Int64)
 	undeployinfra(session_id)
 end
 
