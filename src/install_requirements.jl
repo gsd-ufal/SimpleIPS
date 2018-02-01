@@ -19,11 +19,12 @@ end
 
 
 
+trytoinstall("ImageMorphology","https://github.com/JuliaImages/ImageMorphology.jl.git")
 trytoinstall("ImageMagick","https://github.com/JuliaIO/ImageMagick.jl.git")
 Pkg.build("ImageMagick.jl")
 trytoinstall("Images","https://github.com/JuliaImages/Images.jl.git")
-#trytoinstall("ImageView","https://github.com/JuliaImages/ImageView.jl.git")
-#trytoinstall("TestImages","https://github.com/JuliaIO/TestImages.jl.git")
+trytoinstall("ImageView","https://github.com/JuliaImages/ImageView.jl.git")
+trytoinstall("TestImages","https://github.com/JuliaIO/TestImages.jl.git")
 trytoinstall("FileIO","https://github.com/JuliaIO/FileIO.jl.git")
 trytoinstall("ParallelAccelerator","https://github.com/IntelLabs/ParallelAccelerator.jl.git")
 

@@ -1,4 +1,5 @@
-using Images
+include("install_requirements.jl")
+#using Images
 #using ImageView
 #using ImageMagick
 #using TestImages
@@ -6,7 +7,7 @@ using FileIO
 using ParallelAccelerator
 include("default_kernels.jl")
 
-include("install_requirements.jl")
+
 include("default_kernels.jl")
 
 
@@ -107,7 +108,7 @@ end
 #mock functions at the moment
 
 function getSLA(address::String, authkey::String, sla::String, dataset::String)
-	session_id = 1	
+	return "SLA"
 end
 
 
