@@ -3,11 +3,11 @@ get_datasetsmetadata(serviceadress)
 end
 
 
-getsla(serviceaddress)
+get_sla(serviceaddress)
 
 end
 
-proposesla(serviceadress,auth_token,SLA,dataset)
+propose_sla(serviceadress,auth_token,SLA,dataset)
 
 end
 
@@ -19,3 +19,5 @@ end
 finish(sessionid)
 
 end
+
+
