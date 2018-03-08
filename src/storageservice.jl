@@ -1,7 +1,7 @@
 using HTTP
 using ZipFile
 
-
+global debug = false
 
 _datasetsdir = string(pwd(),"/datasets")
 
@@ -51,7 +51,7 @@ function getzipedcontent(directory::String)
 				
 		#TODO generate request???
 		println("Sending resource request")
-		return string(resource,".zip")
+		return string(directory,"/",resource,".zip")
 		return 200					
 	end
 
@@ -65,10 +65,14 @@ function zipcontent(directory::String)
 	files = readdir(directory)
 
 	w = ZipFile.Writer(string(directory,"/",resource,".zip"))
-	for i in files		
-		newfile = ZipFile.addfile(w,i)
-		f = open(string(directory,"/",i))
-		write(newfile,read(f))
+	for i in files	
+		try	#the attribution creating the variable w creates the .zip file, but its unacessible at the moment of this loop. This try catch is to bypass the error message
+			newfile = ZipFile.addfile(w,i)
+			f = open(string(directory,"/",i))
+			write(newfile,read(f))
+		catch 
+
+		end
 	end
 	close(w)
 end
@@ -83,25 +87,32 @@ end
     rq = string(http.message.target)
     
     fullpath = string(_datasetsdir,rq)
-    println("Stream fieldnames ",fieldnames(http),"\n")
-    println("Message: ",http.message)
-    println("Stream: ",http.stream)
-    println("Writechunked: ",http.writechunked)
-    println("Readchunked: ",http.readchunked)
-    println("Full path ", fullpath)
+
+    if debug
+	    println("Stream fieldnames ",fieldnames(http),"\n")
+	    println("Message: ",http.message)
+	    println("Stream: ",http.stream)
+	    println("Writechunked: ",http.writechunked)
+	    println("Readchunked: ",http.readchunked)
+	    println("Full path ", fullpath)
+	end
 
     println("Calling zipper on:")
 
     norm_resource = http.message.target[2:length(http.message.target)]
 
 
-    getzipedcontent(norm_resource)
+    fullpath = getzipedcontent(norm_resource)
+
+    println("Full path -------->", fullpath)
     println("====================")
     #TODO ZIPAR DIRETÓRIO COMPLETO
     f = open(fullpath) 
-    write(http, f)      
-    global mm = http.message
 
+    
+    write(http, f)     
+    
+    return HTTP.Response("ayyy lmao")
 end
 
 
