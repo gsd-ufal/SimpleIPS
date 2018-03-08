@@ -1,5 +1,5 @@
-#using HTTP
-#using ZipFile
+using HTTP
+using ZipFile
 
 
 
@@ -33,7 +33,7 @@ function getzipedcontent(directory::String)
 	println("rsc_zip ~~>",rsc_zip)
 	println("resource ~~>",resource)
 
-	files = -1
+	files = -1 #Gotta create this variable out of the try catch body
 	try
 		files = readdir(directory)
 	catch
@@ -51,6 +51,7 @@ function getzipedcontent(directory::String)
 				
 		#TODO generate request???
 		println("Sending resource request")
+		return string(resource,".zip")
 		return 200					
 	end
 
@@ -74,41 +75,37 @@ end
 
 
 
-#=
-HTTP.listen() do http::HTTP.Stream  
+
+
+
+
+@async HTTP.listen() do http::HTTP.Stream  
     rq = string(http.message.target)
-    fullpath = string(_datasetsdir,rq)
     
+    fullpath = string(_datasetsdir,rq)
+    println("Stream fieldnames ",fieldnames(http),"\n")
+    println("Message: ",http.message)
+    println("Stream: ",http.stream)
+    println("Writechunked: ",http.writechunked)
+    println("Readchunked: ",http.readchunked)
+    println("Full path ", fullpath)
+
+    println("Calling zipper on:")
+
+    norm_resource = http.message.target[2:length(http.message.target)]
+
+
+    getzipedcontent(norm_resource)
+    println("====================")
     #TODO ZIPAR DIRETÓRIO COMPLETO
     f = open(fullpath) 
-    write(http, f)
-    write(http,"200")  
+    write(http, f)      
+    global mm = http.message
+
+end
 
 
 
 
-#=
-    write(http, "rq")  
-
-    rq =  rq[2:length(rq)]
-    rq = split(rq,"?")
-    
-    url = rq[1]
-
-
-    query = rq[2]	
-	query = split(query,"&")
-	query = map(query) do x split(x,"=") end
-	query = Dict(query)
-
-
-	#f = open(string(_datasetsdir,url))
-
-
-
-    write(http, string("url"))
-
-    =#
    
 
-end =#
