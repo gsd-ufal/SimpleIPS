@@ -1,4 +1,5 @@
-using HTTP
+#using HTTP
+#using ZipFile
 
 
 
@@ -25,14 +26,63 @@ function listdatasets(ddatasetsdir = _datasetsdir)
 end
 
 
+function getzipedcontent(directory::String)
+	resource = split(directory,"/")
+	resource = resource[length(resource)]
+	rsc_zip = string(resource,".zip")
+	println("rsc_zip ~~>",rsc_zip)
+	println("resource ~~>",resource)
 
+	files = -1
+	try
+		files = readdir(directory)
+	catch
+		println("The resource ",directory," does not exist.\n")
+		return 404
+	end	
+	
+	if (length(files) > 0)
+		
+
+		if (!contains(==,files,rsc_zip)) #if the zip is not already created
+			println("Ziping up")
+			zipcontent(directory)
+		end
+				
+		#TODO generate request???
+		println("Sending resource request")
+		return 200					
+	end
+
+	return 404
+end
+
+function zipcontent(directory::String)
+	
+	resource = split(directory,"/")
+	resource = resource[length(resource)]
+	files = readdir(directory)
+
+	w = ZipFile.Writer(string(directory,"/",resource,".zip"))
+	for i in files		
+		newfile = ZipFile.addfile(w,i)
+		f = open(string(directory,"/",i))
+		write(newfile,read(f))
+	end
+	close(w)
+end
+
+
+
+#=
 HTTP.listen() do http::HTTP.Stream  
     rq = string(http.message.target)
     fullpath = string(_datasetsdir,rq)
     
     #TODO ZIPAR DIRETÓRIO COMPLETO
     f = open(fullpath) 
-    write(http, f)  
+    write(http, f)
+    write(http,"200")  
 
 
 
@@ -61,4 +111,4 @@ HTTP.listen() do http::HTTP.Stream
     =#
    
 
-end
+end =#
