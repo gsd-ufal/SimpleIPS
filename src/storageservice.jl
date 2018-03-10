@@ -1,5 +1,6 @@
 using HTTP
 using ZipFile
+using JSON
 
 global debug = false
 
@@ -84,35 +85,51 @@ end
 
 
 @async HTTP.listen() do http::HTTP.Stream  
-    rq = string(http.message.target)
+   
+
+    target = string(http.message.target)
+    method = http.message.method
+    norm_resource = target[2:length(target)] #it only removes the slash. /datasets/whatever becomes datasets/whatever
+	metadsuffix = ".json"	
+
+
+
+    if (method == "GET")	
+    	tokens = Dict(zip(["directory","resource","options"], split(norm_resource,"/")))
+	    fullpath = getzipedcontent(norm_resource)
+	    println("Full path --------> $fullpath")
+
+	    if(!haskey(tokens,"options")) #If there are no options tag for the request, then just send the dataset
+	    	if (fullpath != 404)
+	    		f = open(fullpath)     
+	    		write(http, f) 
+	    	else
+	    		write(http,"{Error : 404}")
+	    	end
+	    end
+
+    elseif (method == "POST")
+
+    end
+
     
-    fullpath = string(_datasetsdir,rq)
 
     if debug
-	    println("Stream fieldnames ",fieldnames(http),"\n")
-	    println("Message: ",http.message)
-	    println("Stream: ",http.stream)
-	    println("Writechunked: ",http.writechunked)
-	    println("Readchunked: ",http.readchunked)
-	    println("Full path ", fullpath)
+	    #println("Stream fieldnames ",fieldnames(http),"\n")
+	    #println("Message: ",http.message)
+	    #println("Stream: ",http.stream)
+	    #println("Writechunked: ",http.writechunked)
+	    #println("Readchunked: ",http.readchunked)
+	    #fullpath = string(_datasetsdir,target)
+	    #println("Full path ", fullpath)
 	end
 
-    println("Calling zipper on:")
-
-    norm_resource = http.message.target[2:length(http.message.target)]
-
-
-    fullpath = getzipedcontent(norm_resource)
-
-    println("Full path -------->", fullpath)
-    println("====================")
-    #TODO ZIPAR DIRETÓRIO COMPLETO
-    f = open(fullpath) 
-
+       
     
-    write(http, f)     
+    global req = http #You can use this variable to check the request stat  via terminal. 
     
-    return HTTP.Response("ayyy lmao")
+    
+    
 end
 
 
