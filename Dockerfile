@@ -46,7 +46,7 @@ RUN apt-get update \
 
 RUN pip install --upgrade pyzmq PyDrive google-api-python-client jsonpointer jsonschema tornado sphinx pygments nose readline mistune invoke
 
-RUN pip install 'notebook==4.2'
+#RUN pip install 'notebook==4.2'
 
 # Install julia 0.6.2
 RUN mkdir -p /opt/julia-0.6.2 && \
@@ -60,7 +60,10 @@ RUN echo "PATH=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/u
     echo "export PATH" >> /etc/environment && \
     echo "source /etc/environment" >> /root/.bashrc
 
-RUN /opt/julia/bin/julia -e 'Pkg.add("IJulia")'
-RUN /opt/julia/bin/julia -e 'Pkg.build("IJulia")'
+RUN git clone https://github.com/gsd-ufal/SimpleIPS.git
+
+#RUN /opt/julia/bin/julia -e 'Pkg.add("IJulia")'
+#RUN /opt/julia/bin/julia -e 'Pkg.build("IJulia")'
+
 
 ENTRYPOINT /bin/bash
