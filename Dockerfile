@@ -61,7 +61,7 @@ RUN echo "PATH=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/u
     echo "source /etc/environment" >> /root/.bashrc
 
 RUN git clone https://github.com/gsd-ufal/SimpleIPS.git
-RUN julia SimpleIPS/src/installers.jl
+
 #RUN /opt/julia/bin/julia -e 'Pkg.add("IJulia")'
 #RUN /opt/julia/bin/julia -e 'Pkg.build("IJulia")'
 
