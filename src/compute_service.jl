@@ -1,5 +1,16 @@
-function deployinfraserver(IPS_auth, resources)
+function deployinfraserver(IPS_auth=0, resources=[512])
 	infra_id = 1
+
+	temp_contname = string("continers/",randstring(10)) 
+	#It will be rand for a  while. The name will be changed after the container creation
+	memory = string("-m=",resources[1],"MB")
+	run(pipeline(`docker run -itd $memory naelsondouglas/julia`, temp_contname))
+	
+	f = open(temp_contname)
+	container_name = string("containers/",chomp(readlines(f)[1]))
+	mv(temp_contname,container_name )
+	
+
 	return infra_id
 end
 
