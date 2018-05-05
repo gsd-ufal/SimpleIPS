@@ -25,6 +25,23 @@ http://127.0.01:8081/datasets/portinari/metadata/foo/bar/foo2/bar2/foo3/bar3
   **Where the field/values for the metadata are listed after the toke "metadata".
   **In this case we are adding the infiormations {"foo" : "bar","foo2":"bar2","foo3":"bar3"}
 
+
+
+#Interacting with compute_service.jl
+
+To start using compute service just include("comput_service.jl")
+
+* To create a container you can use deploy_container([memory, cpus])
+Where memoyr and cpus are two intergers which represent the max amount of memory (in MB) the container will use and cpus is the number of cpus the container will have
+
+* To list your containers being execute you cant use listcontainers()
+
+* To delete an specific container you can use deletecontainer(containerid)
+Where containerid is  string with the ID you can get using listcontainers()
+	You can also use deleteall_containers() to delete all the containers
+
+* The system keeps track of the containers being executed by stoing a file for each of them in .../containers
+
 # Troubleshooting
 
 If Docker shows the error **"Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?"**, just run:
