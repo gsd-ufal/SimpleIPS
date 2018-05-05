@@ -27,7 +27,7 @@ http://127.0.01:8081/datasets/portinari/metadata/foo/bar/foo2/bar2/foo3/bar3
 
 
 
-#Interacting with compute_service.jl
+# Interacting with compute_service.jl
 
 To start using compute service just include("comput_service.jl")
 
