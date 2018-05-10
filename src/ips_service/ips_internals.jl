@@ -1,4 +1,4 @@
-include("compute_service.jl")
+include("../infra/infra_service.jl")
 
 """
 Authenticate the client at Infra Service.
@@ -12,14 +12,14 @@ end
 Maps high-level QoS parameters to resource-level configuration.
 Avaialables SLA are 1, 2, and 3. The higher the value, the more computing
 resources it requires.
-Return the `res_requirements[mem,cpus]` vector or `false` if not sucessfull.
+Return the `res_requirements[mem,cpus]` vector or `-1` if not sucessfull.
 """
 function translate_qos(sla::Int)
 	res_requirements=[0,0]
 
 	if sla < 1 || sla > 3
 		error("SLA $sla NOT supported.")
-		return false
+		return -1
 	elseif sla == 1
 		res_requirements[1] = 512
 		res_requirements[2] = 1
@@ -32,32 +32,6 @@ function translate_qos(sla::Int)
 	end
 
 	return res_requirements
-end
-
-"""
-Deploy infrastructure with `res_requirements` configuration.
-Return the `infra_session_id`
-"""
-function deploy_infra(auth_key,res_requirements)
-	deploycontainer()
-	return 1 #TODO return a unique ID
-end
-
-"""
-Executes the following command:
-```bash
-docker run -m mem --cpus cpus image runtime_conf
-```
-Remark: Optional arguments is not supported currently.
-"""
-function execute(infra_id, runtime_conf, kernel="none", input_dataset::String="none", subset="none")
-	#it will apply the proccess() call itself on the compute service and then return the output
-
-	return output
-end
-
-function undeploy_infra(infra_id::String)
-	#TODO
 end
 
 

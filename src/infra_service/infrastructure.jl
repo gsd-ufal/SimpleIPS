@@ -1,8 +1,8 @@
-include("compute_service.jl")
-#include("log.jl")
+include("local_docker.jl")
 
 """
-Get the metada from available data sets.
+#deploy_infra(1,["512","1"])
+#deleteall_containers()Get the metada from available data sets.
 Return false if not sucessfull.
 """
 function get_datasets_metadata()
@@ -62,21 +62,20 @@ Deploy infrastructure with `res_requirements` configuration.
 Return the `infra_session_id`
 """
 function deploy_infra(auth_key,res_requirements)
-	deploycontainer()
+	#TODO auth_key
+	run_container(res_requirements)
 	return 1 #TODO return a unique ID
 end
+#deploy_infra(1,["512","1"])
+#deleteall_containers()
 
 """
-Executes the following command:
-```bash
-docker run -m mem --cpus cpus image runtime_conf
-```
-Remark: Optional arguments is not supported currently.
+Copy the data to previously deployed infrastructure whose ID is `infra_id`,
+Return `false` if not successful.
 """
-function execute(infra_id, runtime_conf, kernel="none", input_dataset::String="none", subset="none")
-	#it will apply the proccess() call itself on the compute service and then return the output
-
-	return output
+function copy_dataset(infra_id,dataset)
+	#TODO code
+	return true
 end
 
 function undeploy_infra(infra_id::String)
