@@ -70,16 +70,35 @@ end
 #deleteall_containers()
 
 """
-Copy the data to previously deployed infrastructure whose ID is `infra_id`,
+Copy the data set from to previously deployed infrastructure whose ID is `infra_id`,
 Return `false` if not successful.
 """
-function copy_dataset(infra_id,dataset)
-	#TODO code
+function transfer_dataset(infra_id,dataset)
+	#TODO code: copy the data to the running container
 	return true
 end
 
+"""
+Executes the following command:
+```bash
+docker run -m mem --cpus cpus image runtime_conf
+```
+Remark: Optional arguments is not supported currently.
+"""
+function execute(infra_id, runtime_conf, kernel="none", input_dataset::String="none", subset="none")
+	#it will apply the process() call itself on the compute service and then return the output
+
+	return output=1
+
+end
+
+"""
+Destroy all deployed infrastructure.
+Returns -1 if not sucessful.
+"""
 function undeploy_infra(infra_id::String)
 	#TODO
+	return 1
 end
 
 

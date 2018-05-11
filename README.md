@@ -1,6 +1,8 @@
-# SimpleIPS
-An image processing service in the cloud
+The Remote Sensing Processing Service (RSPS) abstracts Cloud infrastructure and storage operations by providing numerical programming interface and uniform access to satellite data sets.
 
+with efficient compiler.
+
+This is possible thanks to Julia programming language
 
 # Interacting with storage.jl
 

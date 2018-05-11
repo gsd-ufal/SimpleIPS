@@ -1,11 +1,16 @@
-include("ips_internals.jl")
+module RSProcessingService
+
+export get_dataset_metadata, get_slas, propose_sla, process, finish
+
+include("storage_service.jl")
+
+ips_storage_authkey=1
 
 """
 Get the metada from available data sets.
-Return false if not sucessfull.
 """
-function get_datasets_metadata()
-	return 1 #TODO return a unique ID or -1 in case of error
+function get_dataset_metadata()
+	return get_available_metadata(ips_storage_authkey) #from ../storage_service/storage.jl
 end
 
 """
@@ -23,7 +28,7 @@ end
 
 """
 Propose an `sla` for using in a given `dataset`.
-`auth_key`
+Return the `session_id` or `-1` if not successful.
 """
 function propose_sla(auth_key,sla,dataset)
 	auth = authenticate(auth_key)
@@ -50,26 +55,108 @@ function propose_sla(auth_key,sla,dataset)
 		return -1
 	end
 
-	
-
-
+	#TODO code
 end
-propose_sla(3)
+
+"""
+Propose an `sla` for using in a given `dataset`.
+Return the `session_id` or `-1` if not successful.
+"""
+function process(session_id, code)
+	#TODO code
+	return -1
+end
+
+"""
+Terminate service provisioning by undeploying the infrastrcture and calculating
+returning the bill to the client.
+Return `-1` if not successful.
+"""
+function finish(session_id, history_data=true)
+	#TODO code
+	return -1
+end
 
 
+#
+# NON-EXPORTED FUNCTIONS
+#
+
+"""
+Authenticate the client at Infra Service.
+Returns the `ips_session_id` or -1 if not sucessfull.
+"""
+function authenticate(auth_key)
+	return 1 #TODO return a unique ID or -1 in case of error
+end
+
+"""
+Maps high-level QoS parameters to resource-level configuration.
+Avaialables SLA are 1, 2, and 3. The higher the value, the more computing
+resources it requires.
+Return the `res_requirements[mem,cpus]` vector or `-1` if not sucessfull.
+"""
+function translate_qos(sla::Int)
+	res_requirements=[0,0]
+
+	if sla < 1 || sla > 3
+		error("SLA $sla NOT supported.")
+		return -1
+	elseif sla == 1
+		res_requirements[1] = 512
+		res_requirements[2] = 1
+	elseif sla == 2
+		res_requirements[1] = 1024
+		res_requirements[2] = 2
+	elseif sla == 3
+		res_requirements[1] = 2048
+		res_requirements[2] = 4
+	end
+
+	return res_requirements
+end
+
+"""
+Initiate billing accounting in a pay-as-you-go fashion.
+Returns -1 if not sucessfully initiated.
+
+Disclaimer: acounting **only serves as means to estimate** the costs on public
+Cloud infrastructure usage.
+"""
+function start_billing(session_id)
+	#TODO tic and save it
+	return 1 #TODO return-1 in case of error
+end
+
+"""
+TODO I think this function is not necessary anymore.
+"""
+function config_execution(session_id)
+	#TODO code
+	return 1 #TODO return-1 in case of error
+end
+
+"""
+Saves historical data of a code execution.
+Returns -1 if not sucessful.
+"""
+function history(session_id, code)
+	#TODO code
+	return 1 #TODO return-1 in case of error
+end
 
 
 """
-Executes the following command:
-```bash
-docker run -m mem --cpus cpus image runtime_conf
-```
-Remark: Optional arguments is not supported currently.
-"""
-function execute(infra_id, runtime_conf, kernel="none", input_dataset::String="none", subset="none")
-	#it will apply the proccess() call itself on the compute service and then return the output
+Initiate billing accounting in a pay-as-you-go fashion.
+Returns -1 if not sucessfully initiated.
 
-	return output
+Disclaimer: acounting **only serves as means to estimate** the costs on public
+Cloud infrastructure usage.
+"""
+function stop_billing(session_id)
+	#TODO toc and save it
+	#TODO calculate the bill based on the SLA and time (translate SLA and calculate)
+	return 1 #TODO return-1 in case of error
 end
 
 #
@@ -77,5 +164,7 @@ end
 #
 
 function test()
-
+	propose_sla(3)
 end
+
+end #Module
