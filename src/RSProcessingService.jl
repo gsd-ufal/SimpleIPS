@@ -1,8 +1,6 @@
 module RSProcessingService
-
+using Infrastrcture
 export get_dataset_metadata, get_slas, propose_sla, process, finish
-
-include("storage_service.jl")
 
 ips_storage_authkey=1
 
@@ -157,14 +155,6 @@ function stop_billing(session_id)
 	#TODO toc and save it
 	#TODO calculate the bill based on the SLA and time (translate SLA and calculate)
 	return 1 #TODO return-1 in case of error
-end
-
-#
-# TESTS
-#
-
-function test()
-	propose_sla(3)
 end
 
 end #Module

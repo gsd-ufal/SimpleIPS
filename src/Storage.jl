@@ -1,4 +1,6 @@
-include("../infra_service/infrastructure.jl")
+module Storage
+using Infrastructure
+export get_available_metadata, load_datasets
 
 """
 Get the metada from available data sets.
@@ -18,3 +20,5 @@ function load_datasets(infra_id,dataset)
 	transfer_dataset(infra_id,dataset) #TODO error treatment
 	return 1 #TODO return a unique ID
 end
+
+end # module

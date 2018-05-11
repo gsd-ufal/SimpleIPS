@@ -55,15 +55,3 @@ end
 function senddatasetsstatus(loadconfirmation)
 	return "data_sets_status"
 end
-
-
-#
-# TESTS
-#
-
-function test()
-	deploycontainer()
-	deleteall_containers()
-	deletecontainer("1")
-
-end

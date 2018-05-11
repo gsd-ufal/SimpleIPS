@@ -1,4 +1,49 @@
-include("local_docker.jl")
+module Infrastrcture
+
+export deploy_infra, execute, undeploy_infra
+
+include("DockerBackend.jl")
+
+"""
+Deploy infrastructure with `res_requirements` configuration.
+Return the `infra_session_id`
+"""
+function deploy_infra(auth_key,res_requirements)
+	#TODO auth_key
+	run_container(res_requirements)
+	return 1 #TODO return a unique ID
+end
+#deploy_infra(1,["512","1"])
+#deleteall_containers()
+
+"""
+Executes the following command:
+```bash
+docker run -m mem --cpus cpus image runtime_conf
+```
+Remark: Optional arguments is not supported currently.
+"""
+function execute(infra_id, runtime_conf, kernel="none", input_dataset::String="none", subset="none")
+	#it will apply the process() call itself on the compute service and then return the output
+
+	return output=1
+
+end
+
+"""
+Destroy all deployed infrastructure.
+Returns -1 if not sucessful.
+"""
+function undeploy_infra(infra_id::String)
+	#TODO
+	return 1
+end
+
+
+
+#
+# NON-EXPORTED FUNCTIONS
+#
 
 """
 #deploy_infra(1,["512","1"])
@@ -57,17 +102,6 @@ function translate_qos(sla::Int)
 	return res_requirements
 end
 
-"""
-Deploy infrastructure with `res_requirements` configuration.
-Return the `infra_session_id`
-"""
-function deploy_infra(auth_key,res_requirements)
-	#TODO auth_key
-	run_container(res_requirements)
-	return 1 #TODO return a unique ID
-end
-#deploy_infra(1,["512","1"])
-#deleteall_containers()
 
 """
 Copy the data set from to previously deployed infrastructure whose ID is `infra_id`,
@@ -78,39 +112,4 @@ function transfer_dataset(infra_id,dataset)
 	return true
 end
 
-"""
-Executes the following command:
-```bash
-docker run -m mem --cpus cpus image runtime_conf
-```
-Remark: Optional arguments is not supported currently.
-"""
-function execute(infra_id, runtime_conf, kernel="none", input_dataset::String="none", subset="none")
-	#it will apply the process() call itself on the compute service and then return the output
-
-	return output=1
-
-end
-
-"""
-Destroy all deployed infrastructure.
-Returns -1 if not sucessful.
-"""
-function undeploy_infra(infra_id::String)
-	#TODO
-	return 1
-end
-
-
-#
-# TESTS
-#
-
-function test()
-
-	run_container(translate_qos(1))
-	deleteall_containers()
-
-	println(get_slas())
-
-end
+end #Module
