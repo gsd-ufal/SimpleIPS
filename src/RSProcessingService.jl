@@ -1,8 +1,7 @@
-module RSProcessingService
-using Infrastrcture
-export get_dataset_metadata, get_slas, propose_sla, process, finish
-
-ips_storage_authkey=1
+rsps_storage_authkey=1
+initial_billing_time=-1
+end_billing_time=-1
+SLA = -1
 
 """
 Get the metada from available data sets.
@@ -25,19 +24,36 @@ function get_slas()
 end
 
 """
-Propose an `sla` for using in a given `dataset`.
+Propose an `sla` for using in a given `dataset`. Avaialable SLAs are:
+
+* 1: 512MB, 1 vCPU,  USD 0.057/hour
+* 2: 1024MB, 2 vCPUs, USD 0.114/hour
+* 3: 2048MB, 4 vCPUs, USD 0.228/hour
+
+SLA should be choosen indicating on of the aforementined IDs (`Int` type).
+Optionally, you can directly indicate the resource requirements if `sla` is
+indicated by `Array{Int}`, e.g., `[512,1]` represents 512MB and 1 vCPU.
+
 Return the `session_id` or `-1` if not successful.
 """
 function propose_sla(auth_key,sla,dataset)
-	auth = authenticate(auth_key)
-	if auth == -1
-		error("Authentication failed: $auth")
+	session_id = authenticate(auth_key)
+	if session_id == -1
+		error("Authentication failed: $session_id")
 		return -1
 	end
-
-	res_requirements = translate_qos(sla)
-	if res_requirements == -1
-		error("QoS translation failed: $res_requirements")
+	println(typeof(sla))
+	if typeof(sla) == Array{Int} #TODO not working
+		res_requirements[1] = sla[1]
+		res_requirements[2] = sla[2]
+	elseif typeof(sla) == Int
+		res_requirements = translate_qos(sla)
+		if res_requirements == -1
+			error("QoS translation failed: $res_requirements")
+			return -1
+		end
+	else
+		error("Bad `sla` type: $typeof(sla)")
 		return -1
 	end
 
@@ -47,22 +63,30 @@ function propose_sla(auth_key,sla,dataset)
 		return -1
 	end
 
-	dataset_status = load_datasets(infra_id,dataset)
+	dataset_status = load_datasets(infra_id,rsps_storage_authkey,dataset)
 	if dataset_status == -1
-		error("Infra deployment failed: ID is $dataset_status")
+		error("Data set loading failed: $dataset_status")
 		return -1
 	end
 
-	#TODO code
+	billing_status = start_billing(session_id)
+	if billing_status == -1
+		error("Billing could not start: $billing_status")
+		return -1
+	end
+
+	info("Proposed SLA $sla from client whose auth_key is $auth_key was
+	accepted. Session ID is $session_id")
+	global SLA = sla
+	return session_id
 end
 
 """
-Propose an `sla` for using in a given `dataset`.
-Return the `session_id` or `-1` if not successful.
+Process the `code`.
+Return the code output or `-1` if not successful.
 """
 function process(session_id, code)
-	#TODO code
-	return -1
+	return execute(infra_id, code)
 end
 
 """
@@ -71,13 +95,14 @@ returning the bill to the client.
 Return `-1` if not successful.
 """
 function finish(session_id, history_data=true)
-	#TODO code
+	#TODO history_data
+
 	return -1
 end
 
 
 #
-# NON-EXPORTED FUNCTIONS
+# INTERNAL FUNCTIONS
 #
 
 """
@@ -96,7 +121,7 @@ Return the `res_requirements[mem,cpus]` vector or `-1` if not sucessfull.
 """
 function translate_qos(sla::Int)
 	res_requirements=[0,0]
-
+	@show sla
 	if sla < 1 || sla > 3
 		error("SLA $sla NOT supported.")
 		return -1
@@ -122,7 +147,7 @@ Disclaimer: acounting **only serves as means to estimate** the costs on public
 Cloud infrastructure usage.
 """
 function start_billing(session_id)
-	#TODO tic and save it
+	# global tiq = tic() #TODO make time counting start here
 	return 1 #TODO return-1 in case of error
 end
 
@@ -152,9 +177,20 @@ Disclaimer: acounting **only serves as means to estimate** the costs on public
 Cloud infrastructure usage.
 """
 function stop_billing(session_id)
-	#TODO toc and save it
-	#TODO calculate the bill based on the SLA and time (translate SLA and calculate)
-	return 1 #TODO return-1 in case of error
+	tic() #FIX create a proper time counting at start_billing
+	sleep(1)
+	bill = -1
+	vCPU_per_sec = 0.00001406
+	mem_1gb_per_sec = 0.00000353
+	# try
+		billing_time = toc()
+		res_req = translate_qos(SLA)
+		@show res_req
+		bill = billing_time * vCPU_per_sec * res_req[2]
+			 + billing_time * mem_1gb_per_sec * res_req[1]/1000
+	 # catch
+		 # error("Billing accounting failed!")
+		 # return -1
+	 # end
+	return bill
 end
-
-end #Module

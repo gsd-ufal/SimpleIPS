@@ -1,33 +1,21 @@
-module Infrastrcture
-
-export deploy_infra, execute, undeploy_infra
-
-include("DockerBackend.jl")
 
 """
 Deploy infrastructure with `res_requirements` configuration.
 Return the `infra_session_id`
 """
 function deploy_infra(auth_key,res_requirements)
-	#TODO auth_key
-	run_container(res_requirements)
+	#TODO auth_key mgmt
+	run_container(auth_key,res_requirements)
 	return 1 #TODO return a unique ID
 end
-#deploy_infra(1,["512","1"])
-#deleteall_containers()
 
 """
-Executes the following command:
-```bash
-docker run -m mem --cpus cpus image runtime_conf
-```
-Remark: Optional arguments is not supported currently.
+Request to backend to execute the `code`.
+Remark: Optional arguments are not supported currently.
 """
-function execute(infra_id, runtime_conf, kernel="none", input_dataset::String="none", subset="none")
-	#it will apply the process() call itself on the compute service and then return the output
-
-	return output=1
-
+function execute(infra_id, code, kernel="none", input_dataset::String="none", subset="none")
+	#TODO infra_id
+	return execute_code(code)
 end
 
 """
@@ -46,9 +34,8 @@ end
 #
 
 """
-#deploy_infra(1,["512","1"])
-#deleteall_containers()Get the metada from available data sets.
-Return false if not sucessfull.
+#TODO doc
+Return `-1` if not sucessfull.
 """
 function get_datasets_metadata()
 	return 1 #TODO return a unique ID or -1 in case of error
@@ -102,14 +89,12 @@ function translate_qos(sla::Int)
 	return res_requirements
 end
 
-
 """
-Copy the data set from to previously deployed infrastructure whose ID is `infra_id`,
-Return `false` if not successful.
+Get the data set from the storage and load it at the
+Return the `infra_session_id`
 """
-function transfer_dataset(infra_id,dataset)
-	#TODO code: copy the data to the running container
-	return true
+function load_datasets(infra_id,rsps_storage_authkey,dataset)
+	data = transfer_datasets(rsps_storage_authkey,dataset) #TODO error treatment
+	#TODO store data in Container memory
+	return 1 #TODO return a unique ID
 end
-
-end #Module

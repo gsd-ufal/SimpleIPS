@@ -1,6 +1,3 @@
-module Storage
-using Infrastructure
-export get_available_metadata, load_datasets
 
 """
 Get the metada from available data sets.
@@ -8,17 +5,15 @@ Return `-1` if not sucessfull.
 """
 function get_available_metadata(ips_storage_authkey)
 	#TODO code
-	return 1 #TODO return -1 in case of error
+	return "mock metadata" #TODO return -1 in case of error
 end
 
-
+get_available_metadata
 """
-Get the data set from the storage and load it at the
-Return the `infra_session_id`
+Copy the data set from to previously deployed infrastructure whose ID is `infra_id`,
+Return `-1` if not successful.
 """
-function load_datasets(infra_id,dataset)
-	transfer_dataset(infra_id,dataset) #TODO error treatment
-	return 1 #TODO return a unique ID
+function transfer_datasets(rsps_storage_authkey,dataset)
+	#TODO code: copy the data to the running container
+	return 0 #TODO Return `-1` if not successful.
 end
-
-end # module
