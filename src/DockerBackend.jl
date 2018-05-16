@@ -1,5 +1,5 @@
-listof_containers = []
 dockerhub_image = string("naelsondouglas/julia")
+listof_containers = Dict()
 
 try
 	#run(`docker pull $dockerhub_image`) #TODO uncomment it
@@ -8,13 +8,20 @@ catch
 	exit(1)
 end
 
+#TODO redo it by using listof_containers
 function listcontainers()
 	readdir("containers")
+end
+
+function add_container_userkey(key,container_id)
+	global listof_containers[key] = vcat(listof_containers[key],container_id)
+	#TODO persistency to FS
 end
 
 "
 Starts a container with the specified resources on the model [memory (MB), cpus].
 The defautl values for memory and CPU is 512MB and 1 core.
+TODO Return ....
 "
 function run_container(auth_key,res_requirements=[512,1])
 	temp_cont_filename = string(randstring(10)) #	temp_dir = mktempdir(pwd())
@@ -22,19 +29,18 @@ function run_container(auth_key,res_requirements=[512,1])
 	memory = string("-m=",res_requirements[1],"MB")
 	cpus = string("--cpus=",res_requirements[2])
 
-	println("Running docker image $dockerhub_image")
+	info("Running docker image $dockerhub_image")
+	temp_cont_filename_string = string(temp_cont_filename)
 	try
-		run(pipeline(`docker run -itd $memory $cpus $dockerhub_image`, string(temp_cont_filename)))
+		run(pipeline(`docker run -itd $memory $cpus $dockerhub_image`, temp_cont_filename_string))
 	catch
-
 		error("Container NOT deployed: could not execute 'docker run' command!")
 		return false
 	end
-
-	#TODO save the list of deployed containers
-	f = open(temp_cont_filename)
+	info("output from docker `run -itd $memory $cpus $dockerhub_image` command was stored at $temp_cont_filename_string")
+	f = open(temp_cont_filename_string)
 	container_id =readlines(f)[1]
-	@show container_id
+	info("Container ID is $container_id")
 	push!(listof_containers, [auth_key,container_id])
 	@show listof_containers
 
@@ -73,11 +79,7 @@ function deletecontainers(auth_key::Int)
 			if c[1] == auth_key
 				info("Asking to delete container whose auth_key is $auth_key:  $c[2]")
 				deletecontainer(c[2])
-
-				PAREI AQUI tetnar remover da listof_containers
-
-				@show c
-				@show getindex(listof_containers,[1, "db12c93df80c4f76e3fefcb9519e6906977ba1f3fa3e7e4c295112d7df89e809"])
+				#TODO PAREI AQUI tetnar remover da listof_containers
 				deleteat!(listof_containers,getindex(listof_containers,c))
 			end
 		end
@@ -99,7 +101,7 @@ function deleteall_containers()
 	containers = readdir("containers")
 	if containers == [] ||
 		(length(containers) == 1 && containers[1] == ".DS_Store") # ignore .DS_Store MacOS dir
-		info("deleteall_containers(): there is no container running.")
+		warn("deleteall_containers(): there is no container running.")
 		return -1
 	end
 	for cont in containers

@@ -2,12 +2,14 @@ rsps_storage_authkey=1
 initial_billing_time=-1
 end_billing_time=-1
 SLA = -1
+"List of clients (`authkey`) and their respective sessions IDs"
+listof_clients = Dict()
 
 """
 Get the metada from available data sets.
 """
 function get_dataset_metadata()
-	return get_available_metadata(ips_storage_authkey) #from ../storage_service/storage.jl
+	return get_available_metadata(rsps_storage_authkey) #from Storage.jl
 end
 
 """
@@ -23,7 +25,27 @@ function get_slas()
 			"SLA 3: 2048MB, 4 vCPUs, USD 0.228/hour"]
 end
 
-"""
+"
+Create a unique client authentication key `authkey` (ID) which enables clients
+to access the service.
+Return the just-created `authkey`.
+"
+function generate_authkey()
+	#TODO sync
+	#TODO enable third-party authentication
+	@show newauthkey = abs(rand(Int))
+	#while contains(==,listof_clients,newauthkey)
+	while haskey(listof_clients,newauthkey)
+		newauthkey = rand(Int)
+	end
+	info("New client auth key $newauthkey generated and will be added to list of clients")
+	#push!(listof_clients,newauthkey)
+	global listof_clients[newauthkey] = []
+	@show listof_clients[newauthkey]
+	return newauthkey
+end
+generate_authkey()
+"
 Propose an `sla` for using in a given `dataset`. Avaialable SLAs are:
 
 * 1: 512MB, 1 vCPU,  USD 0.057/hour
@@ -35,7 +57,7 @@ Optionally, you can directly indicate the resource requirements if `sla` is
 indicated by `Array{Int}`, e.g., `[512,1]` represents 512MB and 1 vCPU.
 
 Return the `session_id` or `-1` if not successful.
-"""
+"
 function propose_sla(auth_key,sla,dataset)
 	session_id = authenticate(auth_key)
 	if session_id == -1
@@ -105,13 +127,25 @@ end
 # INTERNAL FUNCTIONS
 #
 
-"""
+"
 Authenticate the client at Infra Service.
-Returns the `ips_session_id` or -1 if not sucessfull.
-"""
+Returns the `rsps_session_id` or -1 if not sucessfull.
+"
 function authenticate(auth_key)
-	return 1 #TODO return a unique ID or -1 in case of error
+	if !haskey(listof_clients,auth_key)
+		error("Client does NOT have an auth key. Call `generate_authkey` before
+		calling this function.")
+			return -1
+	end
+	return new_session(auth_key)
 end
+
+function new_session(auth_key)
+	return 1 #TODO return a unique session_id (Dict: auth_key -> session_1, session_2, ..., session_N)
+	global listof_containers[key] = vcat(listof_containers[key],container_id)
+end
+
+
 
 """
 Maps high-level QoS parameters to resource-level configuration.

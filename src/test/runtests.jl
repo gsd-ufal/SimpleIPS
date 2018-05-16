@@ -3,7 +3,20 @@ include("../Infrastructure.jl")
 include("../Storage.jl")
 include("../RSProcessingService.jl")
 
-propose_sla(1,1,1)
+info(get_dataset_metadata())
+dataset = get_dataset_metadata()[1]
+
+info(get_slas())
+sla = 1
+
+mykey = generate_authkey()
+session_id = propose_sla(mykey,sla,dataset)
+
+process
+
+function basic_usage()
+
+end
 
 function test_infra()
 	run_container(translate_qos(1))
@@ -31,6 +44,11 @@ function test_storage()
 end
 
 function test_rsps()
+	generate_authkey()
+	get_authkey()
+	get_authkey()
+	println(listof_clients)
+
 	get_dataset_metadata()
 	get_slas()
 	propose_sla(1,1,1)

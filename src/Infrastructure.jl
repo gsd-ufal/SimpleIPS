@@ -1,3 +1,4 @@
+include("DockerBackend.jl")
 
 """
 Deploy infrastructure with `res_requirements` configuration.
@@ -30,7 +31,7 @@ end
 
 
 #
-# NON-EXPORTED FUNCTIONS
+# INTERNAL FUNCTIONS
 #
 
 """
@@ -43,7 +44,7 @@ end
 
 """
 Get the available SLA types. SLA here is simplified to
-Returns the `ips_session_id` or -1 if not sucessfull.
+Returns the `rsps_session_id` or -1 if not sucessfull.
 
 Disclaimer: The **cost is an estimation** on how much would be payed to public
 Clouds for Docker instances with these requirements.
@@ -57,7 +58,7 @@ end
 
 """
 Authenticate the client at Infra Service.
-Returns the `ips_session_id` or -1 if not sucessfull.
+Returns the `rsps_session_id` or -1 if not sucessfull.
 """
 function authenticate(auth_key)
 	return 1 #TODO return a unique ID or -1 in case of error

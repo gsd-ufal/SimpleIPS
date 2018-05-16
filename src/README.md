@@ -25,6 +25,10 @@ Each Julia `module` will represent a microservice. Services should be externally
 ## RESTful API
 * Encapsulate as microservices
 
+## Third-party authentication
+
+Github, Google, Facebook, Linkedin, etc.
+
 ## Integration/Backends
 * JuliaRun
 * Cluster (Kubernetes, etc.)
