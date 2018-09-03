@@ -33,18 +33,15 @@ Return the just-created `authkey`.
 function generate_authkey()
 	#TODO sync
 	#TODO enable third-party authentication
-	@show newauthkey = abs(rand(Int))
-	#while contains(==,listof_clients,newauthkey)
+	newauthkey = abs(rand(Int))
 	while haskey(listof_clients,newauthkey)
 		newauthkey = rand(Int)
 	end
 	info("New client auth key $newauthkey generated and will be added to list of clients")
-	#push!(listof_clients,newauthkey)
 	global listof_clients[newauthkey] = []
-	@show listof_clients[newauthkey]
 	return newauthkey
 end
-generate_authkey()
+
 "
 Propose an `sla` for using in a given `dataset`. Avaialable SLAs are:
 
@@ -59,12 +56,16 @@ indicated by `Array{Int}`, e.g., `[512,1]` represents 512MB and 1 vCPU.
 Return the `session_id` or `-1` if not successful.
 "
 function propose_sla(auth_key,sla,dataset)
+	info("Client $auth_key proposes a contract whose SLA is $typeof(sla)
+			and to use the dataset $dataset")
+
 	session_id = authenticate(auth_key)
 	if session_id == -1
 		error("Authentication failed: $session_id")
 		return -1
 	end
-	println(typeof(sla))
+	global listof_clients[auth_key] = session_id
+
 	if typeof(sla) == Array{Int} #TODO not working
 		res_requirements[1] = sla[1]
 		res_requirements[2] = sla[2]
@@ -129,7 +130,7 @@ end
 
 "
 Authenticate the client at Infra Service.
-Returns the `rsps_session_id` or -1 if not sucessfull.
+Returns the `session_id` or -1 if not sucessfull.
 "
 function authenticate(auth_key)
 	if !haskey(listof_clients,auth_key)
@@ -140,12 +141,30 @@ function authenticate(auth_key)
 	return new_session(auth_key)
 end
 
-function new_session(auth_key)
-	return 1 #TODO return a unique session_id (Dict: auth_key -> session_1, session_2, ..., session_N)
-	global listof_containers[key] = vcat(listof_containers[key],container_id)
+"
+Create a unique session ID for client whose auth_key is `key`
+	and add it to `listof_clients`.
+Return the just-created `session_id` of `-1` if there is no client whose key
+	is `key`.
+TODO sync
+"
+function new_session(key)
+	new_session = -1
+	if !haskey(listof_clients,key)
+		error("Cannot create new session: there is NO client whose auth_key is $key")
+		return new_session
+	end
+	if listof_clients[key] == Any[]
+		new_session = 1
+		global listof_clients[key] = [1]
+	else
+ 		@show findlast(listof_clients[key])
+		new_session = [ findlast(listof_clients[key]) + 1]
+		@show new_session
+		global listof_clients[key] = vcat(listof_clients[key],new_session)
+	end
+	return new_session
 end
-
-
 
 """
 Maps high-level QoS parameters to resource-level configuration.
@@ -155,7 +174,6 @@ Return the `res_requirements[mem,cpus]` vector or `-1` if not sucessfull.
 """
 function translate_qos(sla::Int)
 	res_requirements=[0,0]
-	@show sla
 	if sla < 1 || sla > 3
 		error("SLA $sla NOT supported.")
 		return -1

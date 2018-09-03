@@ -1,8 +1,16 @@
+# Remote Sensing Processing Service
+
 The Remote Sensing Processing Service (RSPS) abstracts Cloud infrastructure and storage operations by providing numerical programming interface and uniform access to satellite data sets.
 
-with efficient compiler.
+RSPS is able to efficiently execute user codes thanks to Julia high-efficient compiler and Docker container virtualization. 
 
-This is possible thanks to Julia programming language
+RSPS is available as a standardized Julia package in your Julia programming environment. For testing purposes (no need to install any software), you might be interested in running some examples [at the RSPS instance deployed at Universidade Federal de Alagoas](TODO).
+
+
+
+
+# OLD
+
 
 # Interacting with storage.jl
 

@@ -3,6 +3,10 @@ include("../Infrastructure.jl")
 include("../Storage.jl")
 include("../RSProcessingService.jl")
 
+test_docker_backend()
+
+
+
 info(get_dataset_metadata())
 dataset = get_dataset_metadata()[1]
 
@@ -11,8 +15,16 @@ sla = 1
 
 mykey = generate_authkey()
 session_id = propose_sla(mykey,sla,dataset)
+@show listof_containers
 
+listcontainers(mykey)
+
+run_container(mykey)
+@show listof_clients
+@show listof_clients
+@show listof_containers
 process
+deleteall_containers()
 
 function basic_usage()
 
@@ -26,15 +38,7 @@ function test_infra()
 end
 
 
-function test_docker_backend()
-	deploy_infra(1,["512","1"])
-	deploy_infra(1,["512","1"])
-	listcontainers()
-	deleteall_containers()
-	deleteall_containers() # should print info
-	deletecontainer("-1") # should print error
-	println(execute_code("-E println(sqrt(144));1+13"))
-end
+
 
 function test_storage()
 	get_dataset_metadata()
