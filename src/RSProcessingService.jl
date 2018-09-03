@@ -1,3 +1,5 @@
+using HTTP
+
 rsps_storage_authkey=1
 initial_billing_time=-1
 end_billing_time=-1
@@ -8,8 +10,18 @@ listof_clients = Dict()
 """
 Get the metada from available data sets.
 """
-function get_dataset_metadata()
-	return get_available_metadata(rsps_storage_authkey) #from Storage.jl
+function get_dataset_metadata(service="http://127.0.0.1:8081",dataset="portinari")
+	reqstring = string(service,"/datasets/$dataset/metadata")
+	r = -1
+	try
+		r = HTTP.request("GET", reqstring; verbose=3)	
+	catch
+		error("Error processing request on funciton get_dataset_metadata \n Check if both service an resource are available \nThe processed request was: $reqstring")
+	end
+
+	println(reqstring)
+	return String(r.body)
+	##return get_available_metadata(rsps_storage_authkey) #from Storage.jl
 end
 
 """

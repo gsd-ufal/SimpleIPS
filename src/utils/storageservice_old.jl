@@ -1,10 +1,10 @@
-using HTTP
+	using HTTP
 using ZipFile
 using JSON
 
 global debug = false
 
-_datasetsdir = string(pwd(),"/datasets")
+_datasetsdir = string(pwd(),"../datasets")
 
 "Gets a dataset name and a dictionary of metadatafield => fieldvalue and updates the metadata for that specified dataset"
 function updatemetadata(dataset::String,metadata::Dict)
