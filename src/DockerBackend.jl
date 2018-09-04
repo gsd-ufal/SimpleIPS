@@ -1,11 +1,15 @@
-dockerhub_image = string("naelsondouglas/julia")
+#dockerhub_image = string("naelsondouglas/julia")
+dockerhub_image = string("hello-world")
 listof_containers = Dict()
 
-try
-	#run(`docker pull $dockerhub_image`) #TODO uncomment it
-catch
-	error("Could NOT pull Docker image `$dockerhub_image`. Check Internet connection. System will quit now.")
-	exit(1)
+"Executes the command `docker pull $img`"
+function pullimage(img="hello-world")
+	try
+		run(`docker pull $img`)
+	catch
+		error("Could NOT pull Docker image `$img`. Check Internet connection. System will quit now.")
+		exit(1)
+	end
 end
 
 "Return the list of containers owned by client whose authentication key is `key`"
