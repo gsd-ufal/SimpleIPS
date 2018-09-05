@@ -47,17 +47,21 @@ end
 Remove a Docker container by Docker container ID.
 This function froces a container to stop.
 Return `false` if not successful.
+Example:
+```julia
+rmcontainer("3c14525d994426c4a0cd1af6189f8bd40a034a70e3ad84d3a287181db18ce014")
+```
 "
-function rmcontainer(id::String)
+function rmcontainer(container_id::String)
 		filename = "docker_output.tmp"
 		try
-			info("Removing container $id")
-			run(pipeline(`docker rm -f $id`, filename)) #, append=true))
+			info("Removing container $container_id")
+			run(pipeline(`docker rm -f $container_id`, filename)) #, append=true))
 		catch
-			warn("Container NOT delete container $id: could not execute 'docker rm' command. See $filename")
+			warn("Container NOT delete container $container_id: could not execute 'docker rm' command. See $filename")
 		end
-		filter!(x -> x ≠ "$id", listof_containers)
-		info("Container $id removed.")
+		filter!(x -> x ≠ "$container_id", listof_containers)
+		info("Container $container_id removed.")
 
 	return true
 end
