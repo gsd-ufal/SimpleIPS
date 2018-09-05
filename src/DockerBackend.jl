@@ -1,9 +1,9 @@
-#dockerhub_image = string("naelsondouglas/julia")
-dockerhub_image = string("hello-world")
-listof_containers = Dict()
+listof_containers = []
+juliabin = "/opt/julia/bin/julia"
+img="hello-world"
 
 "Executes the command `docker pull $img`"
-function pullimage(img="hello-world")
+function pullimage()
 	try
 		run(`docker pull $img`)
 	catch
@@ -12,57 +12,32 @@ function pullimage(img="hello-world")
 	end
 end
 
-"Return the list of containers owned by client whose authentication key is `key`"
-function containers(key)
-	return listof_containers[key]
-end
-
-"
-Add the `container_id` to the `listof_containers` at key `key`.
-TODO persistency to FS: move from run_container to here
-"
-function add_container_userkey(key,container_id::String)
-	if !haskey(listof_containers,key)
-		println("AQUI")
-		@show listof_containers
-		global listof_containers[key] = ["temp"]
-		@show listof_containers
-		global listof_containers[key][1] = container_id
-		@show listof_containers
-	else
-		global listof_containers[key] = vcat(listof_containers[key],container_id)
-	end
-end
-# v = ["a"]
-# @show v
-
 "
 Run a container with the specified resources [memory (MB), cpus].
 The defautl values for memory and CPU is 512MB and 1 core.
 Return the `container_id` or `-1 ` if not sucessful.
 "
-function run_container(auth_key,res_requirements=[512,1])
+function run_container(res_requirements=[512,1])
 	temp_cont_filename = string(randstring(10)) #	temp_dir = mktempdir(pwd())
 	#It will be rand for a  while. The name will be changed after the container creation
 	memory = string("-m=",res_requirements[1],"MB")
 	cpus = string("--cpus=",res_requirements[2])
+	cmd = "docker run -itd $memory $cpus $img"
 
-	info("Running docker image $dockerhub_image")
+	info("Running docker image $img")
 	temp_cont_filename_string = string(temp_cont_filename)
 	try
-		run(pipeline(`docker run -itd $memory $cpus $dockerhub_image`, temp_cont_filename_string))
+		run(pipeline(`docker run -itd $memory $cpus $img`, temp_cont_filename_string))
 	catch
-		error("Container NOT deployed: could not execute 'docker run' command!")
+		error("Container NOT deployed: could not execute: $cmd")
 		return -1
 	end
-	info("Output from docker `run -itd $memory $cpus $dockerhub_image` command was stored at $temp_cont_filename_string")
+	info("Output from docker `$cmd` command was stored at $temp_cont_filename_string")
 	f = open(temp_cont_filename_string)
 	container_id =readlines(f)[1]
 	info("Container ID is $container_id")
-	add_container_userkey(auth_key,container_id)
+	push!(listof_containers,container_id)
 
-	#container_id_path = string("containers/",chomp(container_id))
-	#mv(temp_cont_filename,container_id_path)
 	rm(temp_cont_filename, force=true)
 	info("Container $container_id is up")
 	return container_id
@@ -73,129 +48,80 @@ Remove a Docker container by Docker container ID.
 This function froces a container to stop.
 Return `false` if not successful.
 "
-function rmcontainer(key,id::String)
-	filename = "docker_output.tmp"
-	try
-		info("Removing container $id")
-		run(pipeline(`docker rm -f $id`, filename)) #, append=true))
-	catch
-		error("Container NOT delete container $id: could not execute 'docker rm' command. See $filename")
-		return false
-	end
-	index = findfirst(listof_containers[key],id)
+function rmcontainer(id::String)
+		filename = "docker_output.tmp"
+		try
+			info("Removing container $id")
+			run(pipeline(`docker rm -f $id`, filename)) #, append=true))
+		catch
+			warn("Container NOT delete container $id: could not execute 'docker rm' command. See $filename")
+		end
+		filter!(x -> x ≠ "$id", listof_containers)
+		info("Container $id removed.")
 
-	@show listof_containers[key]
-	@show id
-	@show index
-	@show typeof(listof_containers[key])
-
-	global listof_containers[key] = splice!(listof_containers[key], index)
-
-	info("Container $id removed.")
 	return true
 end
 
 "
-Delete all Docker containers deployed by `auth_key`.
+Delete all Docker deployed containers.
 This function froces a container to stop.
 Return `false` if not successful.
 "
-function deletecontainers(auth_key::Int)
-#	try
-		for c in listof_containers
-			if c[1] == auth_key
-				info("Asking to delete container whose auth_key is $auth_key:  $c[2]")
-				deletecontainer(c[2])
-				#TODO PAREI AQUI tetnar remover da listof_containers
-				deleteat!(listof_containers,getindex(listof_containers,c))
-			end
+function deletecontainers()
+		if isempty(listof_containers)
+			info("No container to be deleted!")
+			return true
 		end
-# UNDO	catch
-#		error("Could NOT delete container whose auth_key is $auth_key")
-#		return false
-#	end
-	return true
-end
 
-"
-Delete all containers created by DockerBackend.
-Returns `-1` if there is no container running and does not call
-`docker rm` command.
-"
-function deleteall_containers()
-	println("Deleting all containers")
-	containers = readdir("containers")
-	if containers == [] ||
-		(length(containers) == 1 && containers[1] == ".DS_Store") # ignore .DS_Store MacOS dir
-		warn("deleteall_containers(): there is no container running.")
-		return -1
-	end
-	for cont in containers
-		if ! (cont == ".DS_Store") # ignore .DS_Store MacOS dir
-			@async deletecontainer(cont)
+		containers = copy(listof_containers)
+		for c in containers
+			rmcontainer(c)
 		end
-	end
-end
-
-#It will send the IPS a message confirming the loaddataset function worked
-function senddatasetsstatus(loadconfirmation)
-	return "data_sets_status"
 end
 
 """
-Execute the `code` on the previsouly deployed Docker container.
+Execute a Julia `code` on the previsouly deployed Docker container.
 Return `false` if not sucessfull.
 """
-function execute_code(code)
+function execute_code(code,container_id)
 	filename = "docker_output.tmp"
-	juliabin = "/opt/julia-0.6.2/bin/julia"
 	try
+		println("docker exec $container_id $juliabin $code")
 		run(pipeline(`docker exec $container_id $juliabin $code`, filename)) #, append=true))
 	catch
 		error("Could NOT `docker exec` code on Docker container $container_id. See $filename")
 		return false
 	end
+
 	return readlines(filename)
 end
 
-#TODO-Naelson fix add/remove container_id at listof_containers
+
+
 function test_docker_backend()
 
-	cid = run_container(1,["512","2"])
+	# creating and removing 3 containers
+	for i in 1:3
+		run_container()
+	end
 	@show listof_containers
-	rmcontainer(1,cid)
-
-	rmcontainer(1,"2e9bd94aa76457a0ec14788def15797e06626661f75c58106af1c66261c97326")
+	deletecontainers()
 	@show listof_containers
-	cid
+	deletecontainers() # should print an INFO
 
-	@show
-	index = findfirst(listof_containers[1],cid)
-	@show index
-	splice!(listof_containers[1], index)
-
-
-	@show length(listof_containers[1][2])
-	@show listof_containers[1]
-
-
-
-	global listof_containers[key] = splice!(listof_containers[key], index)
-
-
-
-
-
-	run_container(1)
-	@show containers(1)
-	@show containers(2)
-	run_container(2)
+	# creating a customized container and removing it
+	cid = run_container(["512","2"])
 	@show listof_containers
+	rmcontainer(cid)
 
+	rmcontainer("a") # should print an Error
 
+	global img = "dmlt"
+	cid = run_container()
+	println(run(`docker exec $cid ls`))
+	println(execute_code("-E \"println(sqrt(144));1+13\"",cid)) # buggy: should print the result
+	rmcontainer(cid)
 
-	# deleteall_containers()
-	# deleteall_containers() # should print info
-	# deletecontainer("-1") # should print error
-	# println(execute_code("-E println(sqrt(144));1+13"))
 end
+
+test_docker_backend()
